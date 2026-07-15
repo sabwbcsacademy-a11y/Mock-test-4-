@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অনলাইন মক টেস্ট (Mock Test)</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, Arial;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            flex: 1 1 100%;
+            margin-bottom: 10px;
+        }
+
+        .timer-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 5px auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .instructions {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #0f172a;
+            white-space: pre-line;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--secondary-color);
+        }
+
+        .correct {
+            background-color: #d1fae5 !important;
+            border-color: var(--success-color) !important;
+            color: #065f46 !important;
+            font-weight: 600;
+        }
+
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border-color: var(--danger-color) !important;
+            color: #991b1b !important;
+            font-weight: 600;
+        }
+
+        .correct-answer-marker {
+            margin-left: auto;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .wrong-answer-marker {
+            margin-left: auto;
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 40px auto;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .submit-btn:hover {
+            background-color: #172554;
+        }
+
+        .result-panel {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .result-panel h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .disabled-options {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <h1>অনлайн মক টেস্ট (Mock Test)</h1>
+        <div class="timer-box" id="timer">সময় বাকি: 30:00</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="instructions" id="instruction-block">
+        <h3>পরীক্ষার নির্দেশাবলী:</h3>
+        <ul>
+            <li>মোট প্রশ্ন সংখ্যা: <strong>৫০টি</strong></li>
+            <li>মোট বরাদ্দ সময়: <strong>৩০ মিনিট</strong></li>
+            <li>প্রতিটি সঠিক উত্তরের জন্য পাবেন: <strong>+১ নম্বর</strong></li>
+            <li>প্রতিটি ভুল উত্তরের জন্য কাটা যাবে: <strong>-০.২৫ নম্বর</strong></li>
+            <li>নির্ধারিত সময় শেষ হলে পরীক্ষাটি স্বয়ংক্রিয়ভাবে জমা হয়ে যাবে।</li>
+        </ul>
+    </div>
+
+    <div class="result-panel" id="result-panel">
+        <h2>ফলাফল বিবরণী</h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div>মোট প্রাপ্ত নম্বর</div>
+                <div class="stat-val" id="final-score">0</div>
+            </div>
+            <div class="stat-card">
+                <div>সঠিক উত্তর</div>
+                <div class="stat-val" id="correct-count" style="color: var(--success-color);">0</div>
+            </div>
+            <div class="stat-card">
+                <div>ভুল উত্তর</div>
+                <div class="stat-val" id="wrong-count" style="color: var(--danger-color);">0</div>
+            </div>
+            <div class="stat-card">
+                <div>অনুত্তরিত</div>
+                <div class="stat-val" id="unanswered-count">0</div>
+            </div>
+        </div>
+        <p style="font-weight: bold; color: #475569;">নিচে আপনার উত্তরপত্রের প্রিভিউ দেওয়া হলো।</p>
+    </div>
+
+    <form id="quiz-form">
+        <!-- Q1 -->
+        <div class="question-card">
+            <div class="question-text">১. একটি কাজ A একা ১৫ দিনে এবং B একা ২০ দিনে করতে পারে। উভয়ে একসাথে কাজটি কত দিনে শেষ করবে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q1" value="A">A) ৮ দিন</label>
+                <label class="option-label"><input type="radio" name="q1" value="B">B) ৮(৪/৭) দিন</label>
+                <label class="option-label"><input type="radio" name="q1" value="C">C) ৯ দিন</label>
+                <label class="option-label"><input type="radio" name="q1" value="D">D) ১০ দিন</label>
+            </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-card">
+            <div class="question-text">২. একটি সংখ্যার ৩০% এবং অন্য একটি সংখ্যার ৪০% সমান। সংখ্যাদ্বয়ের অনুপাত কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q2" value="A">A) ৩ : ৪</label>
+                <label class="option-label"><input type="radio" name="q2" value="B">B) ৪ : ৩</label>
+                <label class="option-label"><input type="radio" name="q2" value="C">C) ৯ : ৪</label>
+                <label class="option-label"><input type="radio" name="q2" value="D">D) ৪ : ৯</label>
+            </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-card">
+            <div class="question-text">৩. একটি ট্রেন ৫৪ কিমি/ঘণ্টা বেগে চলছে। ৩০০ মিটার দীর্ঘ একটি সেতু ৪০ সেকেন্ডে অতিক্রম করে। ট্রেনটির দৈর্ঘ্য কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q3" value="A">A) ২০০ মিটার</label>
+                <label class="option-label"><input type="radio" name="q3" value="B">B) ২৫০ মিটার</label>
+                <label class="option-label"><input type="radio" name="q3" value="C">C) ৩০০ মিটার</label>
+                <label class="option-label"><input type="radio" name="q3" value="D">D) ৩৫০ মিটার</label>
+            </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-card">
+            <div class="question-text">৪. যদি x + y = 5 এবং x - y = 3 হয়, তবে (x² + y²) -এর মান কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q4" value="A">A) ২১</label>
+                <label class="option-label"><input type="radio" name="q4" value="B">B) ২২</label>
+                <label class="option-label"><input type="radio" name="q4" value="C">C) ২৩</label>
+                <label class="option-label"><input type="radio" name="q4" value="D">D) ২৪</label>
+            </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-card">
+            <div class="question-text">৫. একটি পণ্যের ক্রয়মূল্যের উপর ২৫% লাভ করতে হলে বিক্রয়মূল্য ক্রয়মূল্যের কত শতাংশ হবে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q5" value="A">A) ১১৫%</label>
+                <label class="option-label"><input type="radio" name="q5" value="B">B) ১২০%</label>
+                <label class="option-label"><input type="radio" name="q5" value="C">C) ১২৫%</label>
+                <label class="option-label"><input type="radio" name="q5" value="D">D) ১৩০%</label>
+            </div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="question-card">
+            <div class="question-text">৬. নিচের কোন বাক্যটি সঠিক?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q6" value="A">A) Each of the students have submitted their assignment.</label>
+                <label class="option-label"><input type="radio" name="q6" value="B">B) Each of the students has submitted his assignment.</label>
+                <label class="option-label"><input type="radio" name="q6" value="C">C) Each students has submitted his assignment.</label>
+                <label class="option-label"><input type="radio" name="q6" value="D">D) Each of students have submitted.</label>
+            </div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="question-card">
+            <div class="question-text">৭. "Obsolete" শব্দের সমার্থক শব্দ কোনটি?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q7" value="A">A) Modern</label>
+                <label class="option-label"><input type="radio" name="q7" value="B">B) Ancient</label>
+                <label class="option-label"><input type="radio" name="q7" value="C">C) Outdated</label>
+                <label class="option-label"><input type="radio" name="q7" value="D">D) Useful</label>
+            </div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="question-card">
+            <div class="question-text">৮. Choose the correct passive voice: People speak Bengali here.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q8" value="A">A) Bengali is spoken here.</label>
+                <label class="option-label"><input type="radio" name="q8" value="B">B) Bengali was spoken here.</label>
+                <label class="option-label"><input type="radio" name="q8" value="C">C) Bengali has spoken here.</label>
+                <label class="option-label"><input type="radio" name="q8" value="D">D) Bengali speaks here.</label>
+            </div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="question-card">
+            <div class="question-text">৯. Fill in the blank: Hardly had I reached the station ____ the train left.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q9" value="A">A) than</label>
+                <label class="option-label"><input type="radio" name="q9" value="B">B) when</label>
+                <label class="option-label"><input type="radio" name="q9" value="C">C) then</label>
+                <label class="option-label"><input type="radio" name="q9" value="D">D) after</label>
+            </div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="question-card">
+            <div class="question-text">১০. Choose the correctly spelt word.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q10" value="A">A) Accomodation</label>
+                <label class="option-label"><input type="radio" name="q10" value="B">B) Accommodation</label>
+                <label class="option-label"><input type="radio" name="q10" value="C">C) Acommodation</label>
+                <label class="option-label"><input type="radio" name="q10" value="D">D) Accommadation</label>
+            </div>
+        </div>
+
+        <!-- Q11 -->
+        <div class="question-card">
+            <div class="question-text">১১. ভারতীয় সংবিধানের কোন অনুচ্ছেদে সাংবিধানিক প্রতিকারের অধিকার (Right to Constitutional Remedies) বর্ণিত হয়েছে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q11" value="A">A) অনুচ্ছেদ ১৯</label>
+                <label class="option-label"><input type="radio" name="q11" value="B">B) অনুচ্ছেদ ২১</label>
+                <label class="option-label"><input type="radio" name="q11" value="C">C) অনুচ্ছেদ ৩২</label>
+                <label class="option-label"><input type="radio" name="q11" value="D">D) অনুচ্ছেদ ৩৫</label>
+            </div>
+        </div>
+
+        <!-- Q12 -->
+        <div class="question-card">
+            <div class="question-text">১২. ভারতের প্রথম Chief of Defence Staff (CDS) কে ছিলেন?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q12" value="A">A) জেনারেল বিপিন রাওয়াত</label>
+                <label class="option-label"><input type="radio" name="q12" value="B">B) জেনারেল এম. এম. নারাভানে</label>
+                <label class="option-label"><input type="radio" name="q12" value="C">C) জেনারেল ভি. কে. সিং</label>
+                <label class="option-label"><input type="radio" name="q12" value="D">D) জেনারেল দালবীর সিং</label>
+            </div>
+        </div>
+
+        <!-- Q13 -->
+        <div class="question-card">
+            <div class="question-text">১৩. ভারতের সংবিধানের মৌলিক কর্তব্য (Fundamental Duties) কোন সংশোধনীর মাধ্যমে সংযোজিত হয়?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q13" value="A">A) ৪২তম</label>
+                <label class="option-label"><input type="radio" name="q13" value="B">B) ৪৪তম</label>
+                <label class="option-label"><input type="radio" name="q13" value="C">C) ৫২তম</label>
+                <label class="option-label"><input type="radio" name="q13" value="D">D) ৭৩তম</label>
+            </div>
+        </div>
+
+        <!-- Q14 -->
+        <div class="question-card">
+            <div class="question-text">১৪. নিম্নের কোনটি UNESCO World Heritage Site?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q14" value="A">A) সুন্দরবন জাতীয় উদ্যান</label>
+                <label class="option-label"><input type="radio" name="q14" value="B">B) জিম করবেট জাতীয় উদ্যান</label>
+                <label class="option-label"><input type="radio" name="q14" value="C">C) কাজিরাঙা জাতীয় উদ্যান</label>
+                <label class="option-label"><input type="radio" name="q14" value="D">D) পেরিয়ার জাতীয় উদ্যান</label>
+            </div>
+        </div>
+
+        <!-- Q15 -->
+        <div class="question-card">
+            <div class="question-text">১৫. ভারতের জাতীয় আয় (National Income) গণনার প্রধান দায়িত্বে কোন সংস্থা রয়েছে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q15" value="A">A) RBI</label>
+                <label class="option-label"><input type="radio" name="q15" value="B">B) অর্থ মন্ত্রক</label>
+                <label class="option-label"><input type="radio" name="q15" value="C">C) পরিসংখ্যান ও কর্মসূচি বাস্তবায়ন মন্ত্রক (MOSPI)</label>
+                <label class="option-label"><input type="radio" name="q15" value="D">D) NITI Aayog</label>
+            </div>
+        </div>
+
+        <!-- Q16 -->
+        <div class="question-card">
+            <div class="question-text">১৬. দুটি সংখ্যার গ.সা.гу ১৮ এবং ল.সা.গু ৫৪০। একটি সংখ্যা ৯০ হলে অপর সংখ্যাটি কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q16" value="A">A) ১০৮</label>
+                <label class="option-label"><input type="radio" name="q16" value="B">B) ৯০</label>
+                <label class="option-label"><input type="radio" name="q16" value="C">C) ১২০</label>
+                <label class="option-label"><input type="radio" name="q16" value="D">D) ১৪৪</label>
+            </div>
+        </div>
+
+        <!-- Q17 -->
+        <div class="question-card">
+            <div class="question-text">১৭. একটি নৌকা স্থির জলে ঘণ্টায় ১২ কিমি বেগে চলে। স্রোতের বেগ ঘণ্টায় ৩ কিমি। অনুকূলে ৪৫ কিমি যেতে কত সময় লাগবে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q17" value="A">A) ২ ঘণ্টা</label>
+                <label class="option-label"><input type="radio" name="q17" value="B">B) ৩ ঘণ্টা</label>
+                <label class="option-label"><input type="radio" name="q17" value="C">C) ৪ ঘণ্টা</label>
+                <label class="option-label"><input type="radio" name="q17" value="D">D) ৫ ঘণ্টা</label>
+            </div>
+        </div>
+
+        <!-- Q18 -->
+        <div class="question-card">
+            <div class="question-text">১৮. এক ব্যক্তি ২০% ক্ষতিতে একটি দ্রব্য ৮০০ টাকায় বিক্রি করল। ক্রয়মূল্য কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q18" value="A">A) ₹৯০০</label>
+                <label class="option-label"><input type="radio" name="q18" value="B">B) ₹৯৫০</label>
+                <label class="option-label"><input type="radio" name="q18" value="C">C) ₹১০০০</label>
+                <label class="option-label"><input type="radio" name="q18" value="D">D) ₹১১০০</label>
+            </div>
+        </div>
+
+        <!-- Q19 -->
+        <div class="question-card">
+            <div class="question-text">১৯. যদি √x + √y = 7 এবং √x - √y = 1 হয়, তবে √(xy) -এর মান কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q19" value="A">A) ৬</label>
+                <label class="option-label"><input type="radio" name="q19" value="B">B) ৭</label>
+                <label class="option-label"><input type="radio" name="q19" value="C">C) ৮</label>
+                <label class="option-label"><input type="radio" name="q19" value="D">D) ৯</label>
+            </div>
+        </div>
+
+        <!-- Q20 -->
+        <div class="question-card">
+            <div class="question-text">২০. একটি বৃত্তের ব্যাস ১৪ সেমি হলে ক্ষেত্রফল কত? (π = 22/7)</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q20" value="A">A) ১৫৪ বর্গ সেমি</label>
+                <label class="option-label"><input type="radio" name="q20" value="B">B) ১৬৪ বর্গ সেমি</label>
+                <label class="option-label"><input type="radio" name="q20" value="C">C) ১৭৪ বর্গ সেমি</label>
+                <label class="option-label"><input type="radio" name="q20" value="D">D) ১৮৪ বর্গ সেমি</label>
+            </div>
+        </div>
+
+        <!-- Q21 -->
+        <div class="question-card">
+            <div class="question-text">২১. একটি মূলধন ৮% সরল সুদে ৫ বছরে ₹৪০০ সুদ দেয়। মূলধন কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q21" value="A">A) ₹৮০০</label>
+                <label class="option-label"><input type="radio" name="q21" value="B">B) ₹৯০০</label>
+                <label class="option-label"><input type="radio" name="q21" value="C">C) ₹১০০০</label>
+                <label class="option-label"><input type="radio" name="q21" value="D">D) ₹১২০০</label>
+            </div>
+        </div>
+
+        <!-- Q22 -->
+        <div class="question-card">
+            <div class="question-text">২২. ০.০৪৯ × ১০০ = কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q22" value="A">A) ০.৪৯</label>
+                <label class="option-label"><input type="radio" name="q22" value="B">B) ৪.৯</label>
+                <label class="option-label"><input type="radio" name="q22" value="C">C) ৪৯</label>
+                <label class="option-label"><input type="radio" name="q22" value="D">D) ০.০৪৯</label>
+            </div>
+        </div>
+
+        <!-- Q23 -->
+        <div class="question-card">
+            <div class="question-text">২৩. যদি A:B = ৪:৫ এবং B:C = ১০:৭ হয়, তবে A:C = কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q23" value="A">A) ৮:৭</label>
+                <label class="option-label"><input type="radio" name="q23" value="B">B) ৭:৮</label>
+                <label class="option-label"><input type="radio" name="q23" value="C">C) ৫:৭</label>
+                <label class="option-label"><input type="radio" name="q23" value="D">D) ৪:৭</label>
+            </div>
+        </div>
+
+        <!-- Q24 -->
+        <div class="question-card">
+            <div class="question-text">২৪. (১০.৫)² -এর মান কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q24" value="A">A) ১০৫</label>
+                <label class="option-label"><input type="radio" name="q24" value="B">B) ১০৭</label>
+                <label class="option-label"><input type="radio" name="q24" value="C">C) ১০৯.২৫</label>
+                <label class="option-label"><input type="radio" name="q24" value="D">D) ১১০.২৫</label>
+            </div>
+        </div>
+
+        <!-- Q25 -->
+        <div class="question-card">
+            <div class="question-text">২৫. একটি ঘনকের বাহু ৬ সেমি হলে তার আয়তন কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q25" value="A">A) ১৮০</label>
+                <label class="option-label"><input type="radio" name="q25" value="B">B) ২১৬</label>
+                <label class="option-label"><input type="radio" name="q25" value="C">C) ২৪০</label>
+                <label class="option-label"><input type="radio" name="q25" value="D">D) ২৫৬</label>
+            </div>
+        </div>
+
+        <!-- Q26 -->
+        <div class="question-card">
+            <div class="question-text">২৬. Choose the correct synonym of "Abundant"</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q26" value="A">A) Scarce</label>
+                <label class="option-label"><input type="radio" name="q26" value="B">B) Plenty</label>
+                <label class="option-label"><input type="radio" name="q26" value="C">C) Rare</label>
+                <label class="option-label"><input type="radio" name="q26" value="D">D) Empty</label>
+            </div>
+        </div>
+
+        <!-- Q27 -->
+        <div class="question-card">
+            <div class="question-text">২৭. Choose the antonym of "Hostile"</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q27" value="A">A) Friendly</label>
+                <label class="option-label"><input type="radio" name="q27" value="B">B) Angry</label>
+                <label class="option-label"><input type="radio" name="q27" value="C">C) Violent</label>
+                <label class="option-label"><input type="radio" name="q27" value="D">D) Cruel</label>
+            </div>
+        </div>
+
+        <!-- Q28 -->
+        <div class="question-card">
+            <div class="question-text">২৮. Choose the correct sentence.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q28" value="A">A) One of the boys are absent.</label>
+                <label class="option-label"><input type="radio" name="q28" value="B">B) One of the boys is absent.</label>
+                <label class="option-label"><input type="radio" name="q28" value="C">C) One of boys is absent.</label>
+                <label class="option-label"><input type="radio" name="q28" value="D">D) One boys are absent.</label>
+            </div>
+        </div>
+
+        <!-- Q29 -->
+        <div class="question-card">
+            <div class="question-text">২৯. Passive Voice: The teacher praised the student.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q29" value="A">A) The student is praised.</label>
+                <label class="option-label"><input type="radio" name="q29" value="B">B) The student was praised by the teacher.</label>
+                <label class="option-label"><input type="radio" name="q29" value="C">C) The student praised.</label>
+                <label class="option-label"><input type="radio" name="q29" value="D">D) The student has praised.</label>
+            </div>
+        </div>
+
+        <!-- Q30 -->
+        <div class="question-card">
+            <div class="question-text">৩০. Choose the correctly spelt word.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q30" value="A">A) Privilege</label>
+                <label class="option-label"><input type="radio" name="q30" value="B">B) Priviledge</label>
+                <label class="option-label"><input type="radio" name="q30" value="C">C) Privillage</label>
+                <label class="option-label"><input type="radio" name="q30" value="D">D) Privilage</label>
+            </div>
+        </div>
+
+        <!-- Q31 -->
+        <div class="question-card">
+            <div class="question-text">৩১. Fill in the blank. He insisted _______ paying the bill.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q31" value="A">A) on</label>
+                <label class="option-label"><input type="radio" name="q31" value="B">B) in</label>
+                <label class="option-label"><input type="radio" name="q31" value="C">C) at</label>
+                <label class="option-label"><input type="radio" name="q31" value="D">D) with</label>
+            </div>
+        </div>
+
+        <!-- Q32 -->
+        <div class="question-card">
+            <div class="question-text">৩২. Idiom: At sixes and sevens means—</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q32" value="A">A) Confused</label>
+                <label class="option-label"><input type="radio" name="q32" value="B">B) Happy</label>
+                <label class="option-label"><input type="radio" name="q32" value="C">C) Intelligent</label>
+                <label class="option-label"><input type="radio" name="q32" value="D">D) Rich</label>
+            </div>
+        </div>
+
+        <!-- Q33 -->
+        <div class="question-card">
+            <div class="question-text">৩৩. Choose the correct article. He is ____ MLA.</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q33" value="A">A) a</label>
+                <label class="option-label"><input type="radio" name="q33" value="B">B) an</label>
+                <label class="option-label"><input type="radio" name="q33" value="C">C) the</label>
+                <label class="option-label"><input type="radio" name="q33" value="D">D) no article</label>
+            </div>
+        </div>
+
+        <!-- Q34 -->
+        <div class="question-card">
+            <div class="question-text">৩৪. The plural of Phenomenon is-</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q34" value="A">A) Phenomenons</label>
+                <label class="option-label"><input type="radio" name="q34" value="B">B) Phenomena</label>
+                <label class="option-label"><input type="radio" name="q34" value="C">C) Phenomenas</label>
+                <label class="option-label"><input type="radio" name="q34" value="D">D) Phenomenae</label>
+            </div>
+        </div>
+
+        <!-- Q35 -->
+        <div class="question-card">
+            <div class="question-text">৩৫. Choose the correct narration. He said, "I am busy."</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q35" value="A">A) He said he was busy.</label>
+                <label class="option-label"><input type="radio" name="q35" value="B">B) He said I was busy.</label>
+                <label class="option-label"><input type="radio" name="q35" value="C">C) He told he was busy.</label>
+                <label class="option-label"><input type="radio" name="q35" value="D">D) He says he was busy.</label>
+            </div>
+        </div>
+
+        <!-- Q36 -->
+        <div class="question-card">
+            <div class="question-text">৩৬. ভারতের সংবিধানের কোন তফসিলে কেন্দ্র ও রাজ্যের ক্ষমতা বণ্টনের বিষয়টি রয়েছে?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q36" value="A">A) ষষ্ঠ</label>
+                <label class="option-label"><input type="radio" name="q36" value="B">B) সপ্তম</label>
+                <label class="option-label"><input type="radio" name="q36" value="C">C) অষ্টম</label>
+                <label class="option-label"><input type="radio" name="q36" value="D">D) নবম</label>
+            </div>
+        </div>
+
+        <!-- Q37 -->
+        <div class="question-card">
+            <div class="question-text">৩৭. ভারতের প্রথম মহিলা রাজ্যপাল কে ছিলেন?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q37" value="A">A) সরোজিনী নাইডু</label>
+                <label class="option-label"><input type="radio" name="q37" value="B">B) ইন্দিরা গান্ধী</label>
+                <label class="option-label"><input type="radio" name="q37" value="C">C) সুচেতা কৃপালনী</label>
+                <label class="option-label"><input type="radio" name="q37" value="D">D) প্রতিভা পাটিল</label>
+            </div>
+        </div>
+
+        <!-- Q38 -->
+        <div class="question-card">
+            <div class="question-text">৩৮. পঞ্চায়েতি রাজ ব্যবস্থাকে সাংবিধানিক মর্যাদা দেয় কোন সংশোধনী?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q38" value="A">A) ৪২তম</label>
+                <label class="option-label"><input type="radio" name="q38" value="B">B) ৫২তম</label>
+                <label class="option-label"><input type="radio" name="q38" value="C">C) ৭৩তম</label>
+                <label class="option-label"><input type="radio" name="q38" value="D">D) ৭৪তম</label>
+            </div>
+        </div>
+
+        <!-- Q39 -->
+        <div class="question-card">
+            <div class="question-text">৩৯. ভারতের পরিকল্পনা কমিশনের পরিবর্তে কোন সংস্থা গঠিত হয়?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q39" value="A">A) Finance Commission</label>
+                <label class="option-label"><input type="radio" name="q39" value="B">B) NITI Aayog</label>
+                <label class="option-label"><input type="radio" name="q39" value="C">C) RBI</label>
+                <label class="option-label"><input type="radio" name="q39" value="D">D) NABARD</label>
+            </div>
+        </div>
+
+        <!-- Q40 -->
+        <div class="question-card">
+            <div class="question-text">৪০. ভারতের জাতীয় সঙ্গীত প্রথম কবে গাওয়া হয়?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q40" value="A">A) ১৯০৫</label>
+                <label class="option-label"><input type="radio" name="q40" value="B">B) ১৯১১</label>
+                <label class="option-label"><input type="radio" name="q40" value="C">C) ১৯২০</label>
+                <label class="option-label"><input type="radio" name="q40" value="D">D) ১৯৪৭</label>
+            </div>
+        </div>
+
+        <!-- Q41 -->
+        <div class="question-card">
+            <div class="question-text">৪১. ভারতের সর্বোচ্চ অসামরিক সম্মান কোনটি?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q41" value="A">A) পদ্মভূষণ</label>
+                <label class="option-label"><input type="radio" name="q41" value="B">B) পদ্মবিভূষণ</label>
+                <label class="option-label"><input type="radio" name="q41" value="C">C) ভারতরত্ন</label>
+                <label class="option-label"><input type="radio" name="q41" value="D">D) পরমবীর চক্র</label>
+            </div>
+        </div>
+
+        <!-- Q42 -->
+        <div class="question-card">
+            <div class="question-text">৪২. সুন্দরবন বায়োস্ফিয়ার রিজার্ভ প্রধানত কোন প্রাণীর জন্য বিখ্যাত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q42" value="A">A) এশীয় সিংহ</label>
+                <label class="option-label"><input type="radio" name="q42" value="B">B) একশৃঙ্গ গণ্ডার</label>
+                <label class="option-label"><input type="radio" name="q42" value="C">C) রয়্যাল বেঙ্গল টাইগার</label>
+                <label class="option-label"><input type="radio" name="q42" value="D">D) তুষার চিতা</label>
+            </div>
+        </div>
+
+        <!-- Q43 -->
+        <div class="question-card">
+            <div class="question-text">৪৩. মানবদেহে ইনসুলিন হরমোন নিঃসৃত হয়—</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q43" value="A">A) যকৃৎ</label>
+                <label class="option-label"><input type="radio" name="q43" value="B">B) অগ্ন্যাশয়</label>
+                <label class="option-label"><input type="radio" name="q43" value="C">C) কিডনি</label>
+                <label class="option-label"><input type="radio" name="q43" value="D">D) প্লীহা</label>
+            </div>
+        </div>
+
+        <!-- Q44 -->
+        <div class="question-card">
+            <div class="question-text">৪৪. পৃথিবীর বৃহত্তম মহাসাগর কোনটি?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q44" value="A">A) ভারত মহাসাগর</label>
+                <label class="option-label"><input type="radio" name="q44" value="B">B) আটলান্টিক মহাসাগর</label>
+                <label class="option-label"><input type="radio" name="q44" value="C">C) প্রশান্ত মহাসাগর</label>
+                <label class="option-label"><input type="radio" name="q44" value="D">D) সুমেরু মহাসাগর</label>
+            </div>
+        </div>
+
+        <!-- Q45 -->
+        <div class="question-card">
+            <div class="question-text">৪৫. ভারতের সংবিধানের প্রস্তাবনায় "সমাজতান্ত্রিক" শব্দটি কোন সংশোধনীর মাধ্যমে যুক্ত হয়?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q45" value="A">A) ২৪তম</label>
+                <label class="option-label"><input type="radio" name="q45" value="B">B) ৪২তম</label>
+                <label class="option-label"><input type="radio" name="q45" value="C">C) ৪৪তম</label>
+                <label class="option-label"><input type="radio" name="q45" value="D">D) ৫২তম</label>
+            </div>
+        </div>
+
+        <!-- Q46 -->
+        <div class="question-card">
+            <div class="question-text">৪৬. ভারতের নির্বাচন কমিশন একটি—</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q46" value="A">A) সাংবিধানিক সংস্থা</label>
+                <label class="option-label"><input type="radio" name="q46" value="B">B) আইনগত সংস্থা</label>
+                <label class="option-label"><input type="radio" name="q46" value="C">C) বেসরকারি সংস্থা</label>
+                <label class="option-label"><input type="radio" name="q46" value="D">D) বিচার বিভাগীয় সংস্থা</label>
+            </div>
+        </div>
+
+        <!-- Q47 -->
+        <div class="question-card">
+            <div class="question-text">৪৭. রক্তের লোহিত কণিকার গড় আয়ু কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q47" value="A">A) ৬০ দিন</label>
+                <label class="option-label"><input type="radio" name="q47" value="B">B) ৯০ দিন</label>
+                <label class="option-label"><input type="radio" name="q47" value="C">C) ১২০ দিন</label>
+                <label class="option-label"><input type="radio" name="q47" value="D">D) ১৮০ দিন</label>
+            </div>
+        </div>
+
+        <!-- Q48 -->
+        <div class="question-card">
+            <div class="question-text">৪৮. ভারতের সর্বোচ্চ আদালতের বিচারপতিদের অবসরের বয়স কত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q48" value="A">A) ৬০ বছর</label>
+                <label class="option-label"><input type="radio" name="q48" value="B">B) ৬২ বছর</label>
+                <label class="option-label"><input type="radio" name="q48" value="C">C) ৬৫ বছর</label>
+                <label class="option-label"><input type="radio" name="q48" value="D">D) ৬৮ brass</label>
+            </div>
+        </div>
+
+        <!-- Q49 -->
+        <div class="question-card">
+            <div class="question-text">৪৯. 'ভারতের লৌহমানব' (Iron Man of India) নামে কে পরিচিত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q49" value="A">A) মহাত্মা গান্ধী</label>
+                <label class="option-label"><input type="radio" name="q49" value="B">B) সুভাষচন্দ্র বসু</label>
+                <label class="option-label"><input type="radio" name="q49" value="C">C) সর্দার বল্লভভাই প্যাটেল</label>
+                <label class="option-label"><input type="radio" name="q49" value="D">D) জওহরলাল নেহরু</label>
+            </div>
+        </div>
+
+        <!-- Q50 -->
+        <div class="question-card">
+            <div class="question-text">৫০. পশ্চিমবঙ্গের রাজধানী কলকাতা কোন নদীর তীরে অবস্থিত?</div>
+            <div class="options-container">
+                <label class="option-label"><input type="radio" name="q50" value="A">A) গঙ্গা</label>
+                <label class="option-label"><input type="radio" name="q50" value="B">B) ভাগীরথী-হুগলি</label>
+                <label class="option-label"><input type="radio" name="q50" value="C">C) দামোদর</label>
+                <label class="option-label"><input type="radio" name="q50" value="D">D) তিস্তা</label>
+            </div>
+        </div>
+        
+        <button type="button" class="submit-btn" id="submit-btn" onclick="submitQuiz()">জমা দিন (Submit)</button>
+    </form>
+</div>
+
+<script>
+    const totalQuestions = 50;
+    let timeRemaining = 30 * 60; // 30 Minutes
+    let timerInterval;
+    
+    const correctAnswers = {
+        "1": "B", "2": "B", "3": "C", "4": "C", "5": "C", 
+        "6": "B", "7": "C", "8": "A", "9": "B", "10": "B", 
+        "11": "C", "12": "A", "13": "A", "14": "A", "15": "C", 
+        "16": "A", "17": "B", "18": "C", "19": "B", "20": "A", 
+        "21": "C", "22": "B", "23": "A", "24": "D", "25": "B", 
+        "26": "B", "27": "A", "28": "B", "29": "B", "30": "A", 
+        "31": "A", "32": "A", "33": "B", "34": "B", "35": "A", 
+        "36": "B", "37": "A", "38": "C", "39": "B", "40": "B", 
+        "41": "C", "42": "C", "43": "B", "44": "C", "45": "B", 
+        "46": "A", "47": "C", "48": "C", "49": "C", "50": "B"
+    };
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            let mins = Math.floor(timeRemaining / 60);
+            let secs = timeRemaining % 60;
+            
+            let formattedMins = mins < 10 ? '0' + mins : mins;
+            let formattedSecs = secs < 10 ? '0' + secs : secs;
+            
+            document.getElementById('timer').innerText = `সময় বাকি: ${formattedMins}:${formattedSecs}`;
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                alert("সময় শেষ! আপনার উত্তরপত্রটি স্বয়ংক্রিয়ভাবে জমা দেওয়া হচ্ছে।");
+                submitQuiz(true);
+            }
+        }, 1000);
+    }
+
+    function submitQuiz(isAuto = false) {
+        if(!isAuto) {
+            if(!confirm("আপনি কি নিশ্চিত যে আপনি পরীক্ষাটি শেষ করে জমা দিতে চান?")) {
+                return;
+            }
+        }
+        
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = "পরীক্ষা সমাপ্ত";
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('instruction-block').style.display = 'none';
+        
+        let correctCount = 0;
+        let wrongCount = 0;
+        let unansweredCount = 0;
+        
+        const form = document.getElementById('quiz-form');
+        
+        for(let i = 1; i <= totalQuestions; i++) {
+            const selectedOption = form.querySelector(`input[name="q${i}"]:checked`);
+            const correctAnswer = correctAnswers[i];
+            
+            const allOptionsOfQ = form.querySelectorAll(`input[name="q${i}"]`);
+            allOptionsOfQ.forEach(input => {
+                input.disabled = true;
+                input.parentElement.classList.add('disabled-options');
+            });
+
+            if (selectedOption) {
+                const userAns = selectedOption.value;
+                if (userAns === correctAnswer) {
+                    correctCount++;
+                    selectedOption.parentElement.classList.add('correct');
+                    selectedOption.parentElement.innerHTML += ' <span class="correct-answer-marker">✓ সঠিক</span>';
+                } else {
+                    wrongCount++;
+                    selectedOption.parentElement.classList.add('incorrect');
+                    selectedOption.parentElement.innerHTML += ' <span class="wrong-answer-marker">✗ ভুল</span>';
+                    
+                    const correctRadio = form.querySelector(`input[name="q${i}"][value="${correctAnswer}"]`);
+                    if(correctRadio) {
+                        correctRadio.parentElement.classList.add('correct');
+                        correctRadio.parentElement.innerHTML += ' <span class="correct-answer-marker">✓ সঠিক উত্তর</span>';
+                    }
+                }
+            } else {
+                unansweredCount++;
+                const correctRadio = form.querySelector(`input[name="q${i}"][value="${correctAnswer}"]`);
+                if(correctRadio) {
+                    correctRadio.parentElement.classList.add('correct');
+                    correctRadio.parentElement.innerHTML += ' <span class="correct-answer-marker">✓ সঠিক উত্তর (উত্তর দেওয়া হয়নি)</span>';
+                }
+            }
+        }
+        
+        let finalScore = (correctCount * 1) + (wrongCount * -0.25);
+        
+        document.getElementById('final-score').innerText = finalScore.toFixed(2);
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('wrong-count').innerText = wrongCount;
+        document.getElementById('unanswered-count').innerText = unansweredCount;
+        
+        document.getElementById('result-panel').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onload = startTimer;
+</script>
+
+</body>
+</html>
